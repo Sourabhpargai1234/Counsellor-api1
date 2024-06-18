@@ -1,11 +1,11 @@
 import mongoose from 'mongoose'
 import 'dotenv/config'
+var dbHOST= process.env.MongoDBURI
 
 
 const connectDB = async() => {
     try{
-        const MongoDBURI = process.env.MongoDBURI
-        const connectionInstance = await mongoose.connect(MongoDBURI)
+        const connectionInstance = await mongoose.connect(dbHOST)
         console.log(`Connected to: ${connectionInstance.connection.host}`)
     }
     catch(error){
