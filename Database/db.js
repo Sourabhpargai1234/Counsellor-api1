@@ -4,7 +4,7 @@ import 'dotenv/config'
 
 const connectDB = async() => {
     try{
-        const MongoDBURI = process.env.MongoDB_URI
+        const MongoDBURI = process.env.MongoDBURI
         const connectionInstance = await mongoose.connect(MongoDBURI)
         console.log(`Connected to: ${connectionInstance.connection.host}`)
     }
