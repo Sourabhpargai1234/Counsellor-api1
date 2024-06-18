@@ -181,7 +181,7 @@ let resultCallbacks = [];
 
 // Function to start the Python process
 function startPythonProcess() {
-    const scriptPath = path.resolve('src//AI-Model//main.py');
+    const scriptPath = path.resolve('AI-Model//main.py');
     pythonProcess = spawn('python', [scriptPath]);
 
     pythonProcess.stdout.on('data', (data) => {
@@ -261,7 +261,7 @@ const llmModel = asyncHandler((req,res) => {
       return res.status(400).send('Question is required.');
     }
   
-    const pythonScriptPath = path.resolve('src//AI-Model//main2.py');
+    const pythonScriptPath = path.resolve('AI-Model//main2.py');
   
     // Spawn a new process to execute the Python script
     const child = spawn('python', [pythonScriptPath, question])
