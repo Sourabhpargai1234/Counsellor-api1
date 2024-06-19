@@ -16,11 +16,11 @@
     ],
     "routes": [
         {
-            "src": "/api/main2",
+            "src": "/(.*)",
             "dest": "AI-Model/main2.py"
           },
           {
-            "src": "/api/main",
+            "src": "/(.*)",
             "dest": "AI-Model/main.py"
           },
           {
