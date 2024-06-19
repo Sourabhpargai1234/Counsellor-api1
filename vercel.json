@@ -15,14 +15,6 @@
           }
     ],
     "routes": [
-        {
-            "src": "/(.*)",
-            "dest": "AI-Model/main2.py"
-          },
-          {
-            "src": "/(.*)",
-            "dest": "AI-Model/main.py"
-          },
           {
             "src": "/(.*)",
             "dest": "index.js"
