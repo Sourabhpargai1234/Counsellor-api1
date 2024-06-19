@@ -4,15 +4,9 @@
         {
             "src": "index.js",
             "use": "@vercel/node"
-        },
-        { "src": "/AI-Model/main1.py", "use": "@vercel/python" },
-        { "src": "/AI-Model/main2.py", "use": "@vercel/python" }
+        }
     ],
     "routes": [
-      { "src": "/api/v1/users/qa", "dest": "/controllers/user.controller.js" },
-      { "src": "/AI-Model/.*", "dest": "/AI-Model/main1.py" },
-      { "src": "/api/v1/users/qa", "dest": "/controllers/user.controller.js" },
-      { "src": "/AI-Model/.*", "dest": "/AI-Model/main1.py" },
           {
             "src": "/(.*)",
             "dest": "index.js"
