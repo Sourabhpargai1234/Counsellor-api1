@@ -18,7 +18,7 @@ app.use(cookieParser())
 
 
 //routes import
-import userRouter from './routes/user.routes.js'
+import userRouter from './src/routes/user.routes.js'
 
 app.get("/",(req, res) => {
     res.send("Server running successfully")

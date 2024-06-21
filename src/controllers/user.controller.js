@@ -1,7 +1,7 @@
-import { ApiError } from "../utils/ApiError.js";
+import { ApiError } from '../utils/ApiError.js';
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { User } from "../models/user.model.js";
-import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import { uploadOnCloudinary} from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { spawn } from 'child_process';
 import path from 'path';
@@ -168,7 +168,7 @@ const getUserProfile = asyncHandler(async (req, res) => {
 });
 
 const editUserProfile = asyncHandler(async (req, res) => {
-    const { fullName ,username } = req.body;
+    const { fullName, username } = req.body;
 
     let avatarLocalPath;
     if (req.files && Array.isArray(req.files.avatar) && req.files.avatar.length > 0) {
@@ -182,23 +182,24 @@ const editUserProfile = asyncHandler(async (req, res) => {
 
     try {
         // Upload files to Cloudinary
-        const avatarUpload = avatarLocalPath ? uploadOnCloudinary(avatarLocalPath) : Promise.resolve(null);
-        const coverImageUpload = coverImageLocalPath ? uploadOnCloudinary(coverImageLocalPath) : Promise.resolve(null);
+        const avatarUploadPromise = avatarLocalPath ? uploadOnCloudinary(avatarLocalPath) : Promise.resolve(null);
+        const coverImageUploadPromise = coverImageLocalPath ? uploadOnCloudinary(coverImageLocalPath) : Promise.resolve(null);
 
-        const [avatar, coverImage] = await Promise.all([avatarUpload, coverImageUpload]);
+        const [avatarUpload, coverImageUpload] = await Promise.all([avatarUploadPromise, coverImageUploadPromise]);
 
+        // Construct updateFields based on uploaded URLs
         let updateFields = {};
         if (fullName) {
             updateFields.fullName = fullName;
         }
-        if (avatar && avatar.url) {
-            updateFields.avatar = avatar.url;
+        if (avatarUpload && avatarUpload.url) {
+            updateFields.avatar = avatarUpload.url;
         }
-        if (coverImage && coverImage.url) {
-            updateFields.coverImage = coverImage.url;
+        if (coverImageUpload && coverImageUpload.url) {
+            updateFields.coverImage = coverImageUpload.url;
         }
 
-        // Update user profile
+        // Update user profile in the database
         const user = await User.findOneAndUpdate(
             { username },
             { $set: updateFields },
@@ -206,15 +207,16 @@ const editUserProfile = asyncHandler(async (req, res) => {
         );
 
         if (!user) {
-            return res.status(404).json(new ApiResponse(404, null, "User not found"));
+            return res.status(404).json({ message: 'User not found' });
         }
 
-        return res.status(200).json(new ApiResponse(200, user, "User profile updated successfully"));
+        res.status(200).json(user);
     } catch (error) {
         console.error('Error in editUserProfile:', error);
-        return res.status(500).json(new ApiResponse(500, null, "Internal server error"));
+        res.status(500).json({ message: 'Internal server error' });
     }
 });
+
 
 
 
@@ -223,7 +225,7 @@ let resultCallbacks = [];
 
 // Function to start the Python process
 function startPythonProcess() {
-    const scriptPath = path.resolve('AI-Model//main.py');
+    const scriptPath = path.resolve('src/AI-Model//main.py');
     pythonProcess = spawn('python', [scriptPath]);
 
     pythonProcess.stdout.on('data', (data) => {
@@ -303,7 +305,7 @@ const llmModel = asyncHandler((req,res) => {
       return res.status(400).send('Question is required.');
     }
   
-    const pythonScriptPath = path.resolve('AI-Model//main2.py');
+    const pythonScriptPath = path.resolve('src/AI-Model//main2.py');
   
     // Spawn a new process to execute the Python script
     const child = spawn('python', [pythonScriptPath, question])
