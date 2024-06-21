@@ -168,8 +168,7 @@ const getUserProfile = asyncHandler(async (req, res) => {
 });
 
 const editUserProfile = asyncHandler(async (req, res) => {
-    const { refreshToken } = req.cookies;
-    const { fullName } = req.body;
+    const { fullName ,username } = req.body;
 
     let avatarLocalPath;
     if (req.files && Array.isArray(req.files.avatar) && req.files.avatar.length > 0) {
@@ -201,7 +200,7 @@ const editUserProfile = asyncHandler(async (req, res) => {
 
         // Update user profile
         const user = await User.findOneAndUpdate(
-            { refreshToken },
+            { username },
             { $set: updateFields },
             { new: true }
         );
