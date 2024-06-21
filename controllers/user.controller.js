@@ -37,20 +37,29 @@ const registerUser = asyncHandler(async(req, res) => {
     //return response
 
     const {fullName, email, username, password} = req.body
-    //console.log(req.body)
+    console.log(req.body)
     //console.log(req.files)
 
     if(
         [fullName, email, username, password].some((field) => 
         field?.trim()=== "")
     ){
-        throw new ApiError(400, "All fields are required")
+        return res.status(417).json(
+            new ApiResponse(417,"", "All fields required")
+        )
     }
     const existedUser = await User.findOne({
         $or: [{ username } , { email }]
     })
     if(existedUser){
-        throw new ApiError(409, "User existed already with username or email")
+        return res.status(409).json(
+            new ApiResponse(409,"", "User existed with same username")
+        )
+    }
+    if(!username){
+        return res.status(417).json(
+            new ApiResponse(417,"", "Username is required")
+        )
     }
 
 
@@ -65,7 +74,9 @@ const registerUser = asyncHandler(async(req, res) => {
         "-password "  //yeh nahi chahiye ki display ho
     )
     if(!createdUser) {
-        throw new ApiError(500,  "Something went wrong while registering user")
+        return res.status(417).json(
+            new ApiResponse(417,"", "All fields required")
+        )
     }
 
     return res.status(201).json(
@@ -87,11 +98,23 @@ const loginUser = asyncHandler(async(req, res) => {
         $or: [{username}, {email}]
     })
     if(!user){
-        throw new ApiError(404, "User doesn't exist")
+        return res.status(404)
+        .json(
+            new ApiResponse(
+                404,{},
+                "User never existed"
+            )
+        )
     }
     const isPasswordValid = await user.isPasswordCorrect(password)
     if(!isPasswordValid){
-        throw new ApiError(404, "Password Invalid")
+        return res.status(401)
+        .json(
+            new ApiResponse(
+                401,{},
+                "Password mismatched"
+            )
+        )
     }
     const {accessToken, refreshToken} = await generateAccessAndRefreshTokens(user._id)
     //console.log('Generated tokens:', { accessToken, refreshToken });
