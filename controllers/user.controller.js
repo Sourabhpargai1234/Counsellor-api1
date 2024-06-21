@@ -168,7 +168,8 @@ const getUserProfile = asyncHandler(async (req, res) => {
 });
 
 const editUserProfile = asyncHandler(async (req, res) => {
-    const { fullName, username } = req.body;
+    const { refreshToken } = req.cookies;
+    const { fullName } = req.body;
 
     let avatarLocalPath;
     if (req.files && Array.isArray(req.files.avatar) && req.files.avatar.length > 0) {
@@ -198,16 +199,16 @@ const editUserProfile = asyncHandler(async (req, res) => {
     }
 
     const user = await User.findOneAndUpdate(
-        { username: username }, // Query by username
-        { $set: updateFields },
+        { refreshToken },
+        { $set: updateFields},
         { new: true }
     );
 
     if (!user) {
-        return res.status(404).json({ message: 'User not found' });
+        res.status(200).json(new ApiResponse(404, user, "User not found"));
     }
 
-    res.status(200).json(user);
+    res.status(200).json(new ApiResponse(200, user, "User profile Updated successfully"));
 });
 
 
