@@ -150,28 +150,21 @@ const loginUser = asyncHandler(async(req, res) => {
 
 const getUserProfile = asyncHandler(async (req, res) => {
     try {
-        const { refreshToken } = req.cookies;  
-        const user = await User.findOne({ refreshToken });  
+        const { refreshToken } = req.cookies;
+        if (!refreshToken) {
+            return res.status(400).json(new ApiResponse(400, {}, "Refresh token missing"));
+        }
+
+        const user = await User.findOne({ refreshToken });
         if (!user) {
-            return res.status(404)
-            .json(
-                new ApiResponse(
-                    404,{},
-                    "User not existed"
-                )
-            )
-        }    
-        res.json(user);
-      } catch (error) {
+            return res.status(404).json(new ApiResponse(404, {}, "User not existed"));
+        }
+
+        res.status(200).json(new ApiResponse(200, user, "User profile fetched successfully"));
+    } catch (error) {
         console.error('Error fetching user profile:', error);
-        return res.status(404)
-        .json(
-            new ApiResponse(
-                404,{},
-                "Error fetching user profile"
-            )
-        )
-      }
+        return res.status(500).json(new ApiResponse(500, {}, "Error fetching user profile"));
+    }
 });
 
 const editUserProfile = asyncHandler(async (req, res) => {
