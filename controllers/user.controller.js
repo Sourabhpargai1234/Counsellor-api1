@@ -181,35 +181,42 @@ const editUserProfile = asyncHandler(async (req, res) => {
         coverImageLocalPath = req.files.coverImage[0].path;
     }
 
-    // Upload to Cloudinary and get the URLs
-    const avatarUpload = avatarLocalPath ? uploadOnCloudinary(avatarLocalPath) : Promise.resolve(null);
-    const coverImageUpload = coverImageLocalPath ? uploadOnCloudinary(coverImageLocalPath) : Promise.resolve(null);
+    try {
+        // Upload files to Cloudinary
+        const avatarUpload = avatarLocalPath ? uploadOnCloudinary(avatarLocalPath) : Promise.resolve(null);
+        const coverImageUpload = coverImageLocalPath ? uploadOnCloudinary(coverImageLocalPath) : Promise.resolve(null);
 
-    const [avatar, coverImage] = await Promise.all([avatarUpload, coverImageUpload]);
+        const [avatar, coverImage] = await Promise.all([avatarUpload, coverImageUpload]);
 
-    let updateFields = {};
-    if (fullName) {
-        updateFields.fullName = fullName;
+        let updateFields = {};
+        if (fullName) {
+            updateFields.fullName = fullName;
+        }
+        if (avatar && avatar.url) {
+            updateFields.avatar = avatar.url;
+        }
+        if (coverImage && coverImage.url) {
+            updateFields.coverImage = coverImage.url;
+        }
+
+        // Update user profile
+        const user = await User.findOneAndUpdate(
+            { refreshToken },
+            { $set: updateFields },
+            { new: true }
+        );
+
+        if (!user) {
+            return res.status(404).json(new ApiResponse(404, null, "User not found"));
+        }
+
+        return res.status(200).json(new ApiResponse(200, user, "User profile updated successfully"));
+    } catch (error) {
+        console.error('Error in editUserProfile:', error);
+        return res.status(500).json(new ApiResponse(500, null, "Internal server error"));
     }
-    if (avatar && avatar.url) {
-        updateFields.avatar = avatar.url;
-    }
-    if (coverImage && coverImage.url) {
-        updateFields.coverImage = coverImage.url;
-    }
-
-    const user = await User.findOneAndUpdate(
-        { refreshToken },
-        { $set: updateFields},
-        { new: true }
-    );
-
-    if (!user) {
-        res.status(200).json(new ApiResponse(404, user, "User not found"));
-    }
-
-    res.status(200).json(new ApiResponse(200, user, "User profile Updated successfully"));
 });
+
 
 
 let pythonProcess;
