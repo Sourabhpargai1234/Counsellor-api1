@@ -23,6 +23,10 @@ import userRouter from './routes/user.routes.js'
 app.get("/",(req, res) => {
     res.send("Server running successfully")
 });
+
+app.get('/api/v1/test', (req, res) => {
+    res.json({ statusCode: 200, message: 'CORS test successful' });
+});
 //declaration
 app.use("/api/v1/users", userRouter);
 
