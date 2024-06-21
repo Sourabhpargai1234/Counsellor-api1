@@ -146,12 +146,24 @@ const getUserProfile = asyncHandler(async (req, res) => {
         const { refreshToken } = req.cookies;  
         const user = await User.findOne({ refreshToken });  
         if (!user) {
-          return res.status(404).json({ message: 'User not found' });
+            return res.status(404)
+            .json(
+                new ApiResponse(
+                    404,{},
+                    "User not existed"
+                )
+            )
         }    
         res.json(user);
       } catch (error) {
         console.error('Error fetching user profile:', error);
-        res.status(500).json({ message: 'Server error' });
+        return res.status(404)
+        .json(
+            new ApiResponse(
+                404,{},
+                "Error fetching user profile"
+            )
+        )
       }
 });
 
