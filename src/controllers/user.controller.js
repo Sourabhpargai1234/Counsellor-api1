@@ -5,11 +5,7 @@ import { uploadOnCloudinary} from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 //import { spawn } from 'child_process';
 import path from 'path';
-import fs from 'fs'
 import 'dotenv/config';
-import { fileURLToPath } from 'url';
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const generateAccessAndRefreshTokens = async(userId) =>{
     try {
@@ -172,85 +168,47 @@ const getUserProfile = asyncHandler(async (req, res) => {
 });
 
 const editUserProfile = asyncHandler(async (req, res) => {
+    const { refreshToken } =req.cookies;
     const { fullName } = req.body;
-    const { refreshToken } = req.cookies;
-    console.log(fullName);
-    console.log(refreshToken);
-
-    if (!refreshToken) {
-        return res.status(401).json({ message: 'No refresh token provided' });
-    }
 
     let avatarLocalPath;
-    let coverImageLocalPath;
-
     if (req.files && Array.isArray(req.files.avatar) && req.files.avatar.length > 0) {
-        avatarLocalPath = req.files['avatar'][0].path;
+        avatarLocalPath = req.files.avatar[0].path;
     }
 
+    let coverImageLocalPath;
     if (req.files && Array.isArray(req.files.coverImage) && req.files.coverImage.length > 0) {
-        coverImageLocalPath = req.files['coverImage'][0].path;
+        coverImageLocalPath = req.files.coverImage[0].path;
     }
 
-    console.log('Avatar local path:', avatarLocalPath);
-    console.log('Cover image local path:', coverImageLocalPath);
+    // Upload to Cloudinary and get the URLs
+    const avatarUpload = avatarLocalPath ? uploadOnCloudinary(avatarLocalPath) : Promise.resolve(null);
+    const coverImageUpload = coverImageLocalPath ? uploadOnCloudinary(coverImageLocalPath) : Promise.resolve(null);
 
-    // Ensure the public/temp directory exists
-    const tempDir = path.join(__dirname, '..', 'public', 'temp');
-    fs.mkdirSync(tempDir, { recursive: true });
+    const [avatar, coverImage] = await Promise.all([avatarUpload, coverImageUpload]);
 
-    try {
-        // Move files to public/temp directory
-        let avatarTempPath = null;
-        let coverImageTempPath = null;
-
-        if (avatarLocalPath) {
-            avatarTempPath = path.join(tempDir, path.basename(avatarLocalPath));
-            fs.renameSync(avatarLocalPath, avatarTempPath);
-        }
-
-        if (coverImageLocalPath) {
-            coverImageTempPath = path.join(tempDir, path.basename(coverImageLocalPath));
-            fs.renameSync(coverImageLocalPath, coverImageTempPath);
-        }
-
-        // Upload files to Cloudinary
-        const avatarUploadPromise = avatarTempPath ? uploadOnCloudinary(avatarTempPath) : Promise.resolve(null);
-        const coverImageUploadPromise = coverImageTempPath ? uploadOnCloudinary(coverImageTempPath) : Promise.resolve(null);
-
-        const [avatarUpload, coverImageUpload] = await Promise.all([avatarUploadPromise, coverImageUploadPromise]);
-
-        // Construct updateFields based on uploaded URLs
-        let updateFields = {};
-        if (fullName) {
-            updateFields.fullName = fullName;
-        }
-        if (avatarUpload && avatarUpload.url) {
-            updateFields.avatar = avatarUpload.url;
-        }
-        if (coverImageUpload && coverImageUpload.url) {
-            updateFields.coverImage = coverImageUpload.url;
-        }
-
-        // Debug statement to verify updateFields content
-        console.log('updateFields:', updateFields);
-
-        // Update user profile in the database
-        const user = await User.findOneAndUpdate(
-            { refreshToken },
-            { $set: updateFields },
-            { new: true }
-        );
-
-        if (!user) {
-            return res.status(404).json({ message: 'User not found' });
-        }
-
-        res.status(200).json(user);
-    } catch (error) {
-        console.error('Error in editUserProfile:', error);
-        res.status(500).json({ message: 'Internal server error' });
+    let updateFields = {};
+    if (fullName) {
+        updateFields.fullName = fullName;
     }
+    if (avatar && avatar.url) {
+        updateFields.avatar = avatar.url;
+    }
+    if (coverImage && coverImage.url) {
+        updateFields.coverImage = coverImage.url;
+    }
+
+    const user = await User.findOneAndUpdate(
+        { refreshToken },
+        { $set: updateFields },
+        { new: true }
+    );
+
+    if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.status(200).json(user);
 });
 
 
