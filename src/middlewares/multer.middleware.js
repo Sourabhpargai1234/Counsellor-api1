@@ -12,6 +12,6 @@ export const upload = multer({
     storage,
 })*/
 
-const upload = multer({ dest: 'uploads/' });
+const upload = multer({ dest: '/public/temp/' });
 
 export default upload;
