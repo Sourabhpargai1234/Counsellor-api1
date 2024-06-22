@@ -176,7 +176,13 @@ const editUserProfile = asyncHandler(async (req, res) => {
     console.log('Refresh Token:', refreshToken);
   
     if (!refreshToken) {
-      return res.status(401).json({ message: 'No refresh token provided' });
+        return res.status(400).json(new ApiResponse(400, {}, "Refresh token missing"));
+    }
+    if (!fullName) {
+        return res.status(400).json(new ApiResponse(400, {}, "fullName missing"));
+    }
+    if (!req.files) {
+        return res.status(400).json(new ApiResponse(400, {}, "Files missing"));
     }
 
     let avatarLocalPath;
@@ -189,8 +195,6 @@ const editUserProfile = asyncHandler(async (req, res) => {
         coverImageLocalPath = req.files.coverImage[0].path;
     }
 
-    console.log('avatarLocalPath:', avatarLocalPath);
-    console.log('coverImageLocalPath:', coverImageLocalPath);
 
     // Upload to Cloudinary and get the URLs
     const avatarUpload = avatarLocalPath ? uploadOnCloudinary(avatarLocalPath) : Promise.resolve(null);
@@ -198,8 +202,6 @@ const editUserProfile = asyncHandler(async (req, res) => {
 
     const [avatar, coverImage] = await Promise.all([avatarUpload, coverImageUpload]);
 
-    console.log('avatarUpload:', avatarUpload);
-    console.log('coverImageUpload:', coverImageUpload);
 
     let updateFields = {};
     if (fullName) {
@@ -219,7 +221,7 @@ const editUserProfile = asyncHandler(async (req, res) => {
     );
 
     if (!user) {
-        return res.status(404).json({ message: 'User not found' });
+        return res.status(400).json(new ApiResponse(400, {}, "User not found"));
     }
 
     res.status(200).json(user);
