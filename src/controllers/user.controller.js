@@ -3,7 +3,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { User } from "../models/user.model.js";
 import { uploadOnCloudinary} from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
-import { spawn } from 'child_process';
+//import { spawn } from 'child_process';
 import path from 'path';
 import fs from 'fs'
 import 'dotenv/config';
@@ -257,7 +257,7 @@ const editUserProfile = asyncHandler(async (req, res) => {
 
 
 
-let pythonProcess;
+/*let pythonProcess;
 let resultCallbacks = [];
 
 // Function to start the Python process
@@ -333,7 +333,7 @@ const aiModel = asyncHandler((req, res) => {
 
 
 // Function to start the Python process
-
+*/
 
 
 const llmModel = asyncHandler((req,res) => {
@@ -369,4 +369,4 @@ const llmModel = asyncHandler((req,res) => {
 
 
 
-export {registerUser,loginUser, llmModel,aiModel, getUserProfile, editUserProfile}
+export {registerUser,loginUser, getUserProfile, editUserProfile, llmModel}
