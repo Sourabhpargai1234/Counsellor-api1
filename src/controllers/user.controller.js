@@ -171,6 +171,14 @@ const editUserProfile = asyncHandler(async (req, res) => {
     const { refreshToken } =req.cookies;
     const { fullName } = req.body;
 
+    console.log('Request received');
+    console.log('Full Name:', fullName);
+    console.log('Refresh Token:', refreshToken);
+  
+    if (!refreshToken) {
+      return res.status(401).json({ message: 'No refresh token provided' });
+    }
+
     let avatarLocalPath;
     if (req.files && Array.isArray(req.files.avatar) && req.files.avatar.length > 0) {
         avatarLocalPath = req.files.avatar[0].path;
@@ -181,11 +189,17 @@ const editUserProfile = asyncHandler(async (req, res) => {
         coverImageLocalPath = req.files.coverImage[0].path;
     }
 
+    console.log('avatarLocalPath:', avatarLocalPath);
+    console.log('coverImageLocalPath:', coverImageLocalPath);
+
     // Upload to Cloudinary and get the URLs
     const avatarUpload = avatarLocalPath ? uploadOnCloudinary(avatarLocalPath) : Promise.resolve(null);
     const coverImageUpload = coverImageLocalPath ? uploadOnCloudinary(coverImageLocalPath) : Promise.resolve(null);
 
     const [avatar, coverImage] = await Promise.all([avatarUpload, coverImageUpload]);
+
+    console.log('avatarUpload:', avatarUpload);
+    console.log('coverImageUpload:', coverImageUpload);
 
     let updateFields = {};
     if (fullName) {
