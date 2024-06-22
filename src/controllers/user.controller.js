@@ -168,22 +168,33 @@ const getUserProfile = asyncHandler(async (req, res) => {
 });
 
 const editUserProfile = asyncHandler(async (req, res) => {
-    const { fullName, username } = req.body;
+    const { fullName } = req.body;
+    const { refreshToken } = req.cookies;
+    console.log(fullName)
+    console.log(refreshToken)
+
+    if (!refreshToken) {
+        return res.status(401).json({ message: 'No refresh token provided' });
+    }
 
     let avatarLocalPath;
     if (req.files && Array.isArray(req.files.avatar) && req.files.avatar.length > 0) {
-        avatarLocalPath = req.files.avatar[0].path;
+        avatarLocalPath = req.files['avatar'][0].path;
     }
+    console.log(avatarLocalPath)
 
     let coverImageLocalPath;
     if (req.files && Array.isArray(req.files.coverImage) && req.files.coverImage.length > 0) {
-        coverImageLocalPath = req.files.coverImage[0].path;
+        coverImageLocalPath = req.files['coverImage'][0].path;
     }
 
     try {
         // Upload files to Cloudinary
         const avatarUploadPromise = avatarLocalPath ? uploadOnCloudinary(avatarLocalPath) : Promise.resolve(null);
         const coverImageUploadPromise = coverImageLocalPath ? uploadOnCloudinary(coverImageLocalPath) : Promise.resolve(null);
+
+    console.log('Avatar local path:', avatarLocalPath);
+    console.log('Cover image local path:', coverImageLocalPath);
 
         const [avatarUpload, coverImageUpload] = await Promise.all([avatarUploadPromise, coverImageUploadPromise]);
 
@@ -199,9 +210,13 @@ const editUserProfile = asyncHandler(async (req, res) => {
             updateFields.coverImage = coverImageUpload.url;
         }
 
+
+        // Debug statement to verify updateFields content
+        console.log('updateFields:', updateFields);
+
         // Update user profile in the database
         const user = await User.findOneAndUpdate(
-            { username },
+            { refreshToken },
             { $set: updateFields },
             { new: true }
         );
@@ -216,6 +231,7 @@ const editUserProfile = asyncHandler(async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 });
+
 
 
 

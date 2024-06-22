@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { registerUser, loginUser, llmModel, getUserProfile, editUserProfile, aiModel} from "../controllers/user.controller.js";
-import { upload } from "../middlewares/multer.middleware.js";
+import  upload  from "../middlewares/multer.middleware.js";
 
 const router = Router()
 
@@ -13,7 +13,7 @@ router.route("/qa").post(aiModel)
 router.route("/llm").post(llmModel)
 router.route("/profile").get(getUserProfile)
 
-router.route("/edit").post(
+router.route("/edit").patch(
     upload.fields([                               //yeh humara middleware hai
         {
             name: "avatar",
