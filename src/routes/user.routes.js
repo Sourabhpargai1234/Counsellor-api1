@@ -13,7 +13,7 @@ router.route("/login").post(loginUser)
 router.route("/llm").post(llmModel)
 router.route("/profile").get(getUserProfile)
 
-router.route("/edit").get().post(
+router.route("/edit").post(
     upload.fields([                               //yeh humara middleware hai
         {
             name: "avatar",
