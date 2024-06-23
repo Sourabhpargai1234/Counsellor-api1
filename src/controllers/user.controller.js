@@ -171,9 +171,8 @@ const editUserProfile = asyncHandler(async (req, res) => {
     const { refreshToken } =req.cookies;
     const { fullName } = req.body;
 
-    console.log('Request received');
-    console.log('Full Name:', fullName);
-    console.log('Refresh Token:', refreshToken);
+    res.status(200).json(new ApiResponse(200, req.body, " Got fullName at backend"));
+    res.status(200).json(new ApiResponse(200, req.files, "Got files at backend"));
   
     if (!refreshToken) {
         return res.status(400).json(new ApiResponse(400, {}, "Refresh token missing"));
