@@ -13,16 +13,7 @@ router.route("/login").post(loginUser)
 router.route("/llm").post(llmModel)
 router.route("/profile").get(getUserProfile)
 
-router.route("/edit").patch(
-    upload.fields([                               //yeh humara middleware hai
-        {
-            name: "avatar",
-            maxCount: 1
-        },
-        {
-            name: "coverImage",
-            maxCount: 1
-        }
-    ]),
-    editUserProfile)
+router.route("/edit").patch(upload.fields([{ name: 'avatar' }, { name: 'coverImage' }]), editUserProfile)
+
+
 export default router
