@@ -6,7 +6,7 @@ import "dotenv/config"
 const app = express();
 
 app.use(cors({
-    origin: '*',
+    origin: 'https://counsellor-frontend.vercel.app',
     methods: ["POST","GET","PUT","PATCH"],
     credentials: true
 }));
