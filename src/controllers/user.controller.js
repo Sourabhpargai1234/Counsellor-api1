@@ -184,18 +184,18 @@ const editUserProfile = asyncHandler(async (req, res) => {
 
     let avatarLocalPath;
     if (req.files && Array.isArray(req.files.avatar) && req.files.avatar.length > 0) {
-        avatarLocalPath = req.files.avatar[0].path;
+        avatarLocalPath = req.files.avatar[0].buffer;
     }
 
     let coverImageLocalPath;
     if (req.files && Array.isArray(req.files.coverImage) && req.files.coverImage.length > 0) {
-        coverImageLocalPath = req.files.coverImage[0].path;
+        coverImageLocalPath = req.files.coverImage[0].buffer;
     }
 
 
     // Upload to Cloudinary and get the URLs
-    const avatarUpload = avatarLocalPath ? uploadOnCloudinary(avatarLocalPath) : Promise.resolve(null);
-    const coverImageUpload = coverImageLocalPath ? uploadOnCloudinary(coverImageLocalPath) : Promise.resolve(null);
+    const avatarUpload = avatarLocalPath ? await uploadOnCloudinary(avatarLocalPath, 'avatar') : null;
+    const coverImageUpload = coverImageLocalPath ? await uploadOnCloudinary(coverImageLocalPath, 'coverImage') : null;
 
     const [avatar, coverImage] = await Promise.all([avatarUpload, coverImageUpload]);
 
