@@ -53,7 +53,7 @@ const registerUser = asyncHandler(async(req, res) => {
     })
     if(existedUser){
         return res.status(409).json(
-            new ApiResponse(409,"", "User existed with same username")
+            new ApiResponse(409,"", "User existed with same username or email")
         )
     }
     if(!username){
@@ -220,6 +220,7 @@ const editUserProfile = asyncHandler(async (req, res) => {
     if (!user) {
         return res.status(400).json(new ApiResponse(400, {}, "User not found"));
     }
+    
 
     res.status(200).json(user);
 });
